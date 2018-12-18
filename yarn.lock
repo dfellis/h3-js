@@ -3486,6 +3486,11 @@ taffydb@2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/taffydb/-/taffydb-2.6.2.tgz#7cbcb64b5a141b6a2efc2c5d2c67b4e150b2a268"
 
+tap-browser-color@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/tap-browser-color/-/tap-browser-color-0.1.2.tgz#16cf89083adb695b05d49372295e5e90cbbbac31"
+  integrity sha1-Fs+JCDrbaVsF1JNyKV5ekMu7rDE=
+
 tap-parser@~0.4.0:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/tap-parser/-/tap-parser-0.4.3.tgz#a4eae190c10d76c7a111921ff38bbe4d58f09eea"

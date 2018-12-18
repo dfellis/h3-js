@@ -36,17 +36,33 @@ pushd src/h3lib/lib
 cp ../../../../build/sizes.h ../include
 cp ../../../../build/sizes.c .
 # Compile with emscripten
-emcc -O3 -I ../include *.c -o libh3.js -DH3_HAVE_VLA -s WASM=0 -s INVOKE_RUN=0 -s EXPORT_NAME="'libh3'" -s MODULARIZE=1 -s NO_FILESYSTEM=1 -s NODEJS_CATCH_EXIT=0 -s TOTAL_MEMORY=33554432 -s ALLOW_MEMORY_GROWTH=1 -s WARN_UNALIGNED=1 -s EXPORTED_FUNCTIONS=$bound_functions -s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap", "getValue", "setValue"]' --memory-init-file 0
+emcc -O3 -I ../include *.c -o libh3.js -DH3_HAVE_VLA -s SINGLE_FILE=1 -s USE_SDL=0 -s INVOKE_RUN=0 -s EXPORT_NAME="'libh3'" -s MODULARIZE=1 -s NO_FILESYSTEM=1 -s NODEJS_CATCH_EXIT=0 -s TOTAL_MEMORY=33554432 -s ALLOW_MEMORY_GROWTH=1 -s WARN_UNALIGNED=1 -s EXPORTED_FUNCTIONS=$bound_functions -s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap", "getValue", "setValue", "getTempRet0"]' --memory-init-file 0
 cp libh3.js ../../../../out/libh3.js
 cat << EOF >> ../../../../out/libh3.js
-const h3 = libh3();
-module.exports = h3;
-// Regression in latest Emscripten drops these methods, re-attach to the object with proper names
-Object.keys(h3.asmLibraryArg)
-  .filter(k => typeof h3.asmLibraryArg[k] === 'function')
-  .forEach((k) => {
-    h3[h3.asmLibraryArg[k].name] = h3.asmLibraryArg[k];
-  });
+const instantiate = WebAssembly.instantiate;
+module.exports = new Promise((resolve, reject) => {
+  let h3
+  WebAssembly.instantiate = (...args) => new Promise((resolve2, reject2) => {
+    instantiate(...args).then((result) => {
+      resolve2(result)
+      // Regression in latest Emscripten drops these methods, re-attach to the object with proper names
+      Object.keys(h3.asmLibraryArg)
+        .filter(k => typeof h3.asmLibraryArg[k] === 'function')
+        .forEach((k) => {
+          h3[h3.asmLibraryArg[k].name] = h3.asmLibraryArg[k];
+        });
+      // Promise resolution doesn't like a `then` function that self resolves, infinite loop starts
+      delete h3.then
+      resolve(h3)
+      WebAssembly.instantiate = instantiate
+    }, (e) => {
+      reject(e)
+      WebAssembly.instantiate = instantiate
+      reject2(e)
+    })
+  })
+  h3 = libh3()
+})
 EOF
 popd
 popd

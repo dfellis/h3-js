@@ -27,6 +27,7 @@
     "test-es6": "yarn test-raw | faucet",
     "test-parity": "node test/test-parity.js | faucet",
     "test-dist": "node dist/test/index.js | faucet",
+    "test-browser": "yarn dist-test && budo dist/test/index.js -t babelify --open --title 'h3-wasm tests'",
     "cover": "istanbul cover -x out/*.js -- test/index.js",
     "view-cover": "istanbul cover -x out/*.js --report=html -- test/index.js && open coverage/index.html",
     "check-prettier": "yarn prettier && git diff --exit-code",
@@ -55,6 +56,7 @@
     "istanbul": "^0.4.3",
     "jsdoc-to-markdown": "^4.0.1",
     "prettier": "^1.12.1",
+    "tap-browser-color": "^0.1.2",
     "tape": "^4.8.0"
   },
   "engines": {
